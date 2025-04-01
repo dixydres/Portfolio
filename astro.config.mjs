@@ -9,13 +9,11 @@ import tailwindcss from '@tailwindcss/vite';
 // https://astro.build/config
 export default defineConfig({
   site: 'https://dixydres.github.io',
-  base: 'Portfolio',
+  base: '/Portfolio/',
   integrations: [mdx(), sitemap()],
-
   vite: {
     plugins: [tailwindcss()],
   },
-  
 });
 
 
