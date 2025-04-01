@@ -8,7 +8,7 @@ description: "Pour ce projet, je devais réalisé une application visant à aide
                             les
                             stopper. "
 pubDate: 'Sep 18 2024'
-heroImage: '/flash.svg'
+heroImage: '/Portfolio/flash.svg'
 
 ---
 

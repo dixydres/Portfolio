@@ -27,7 +27,8 @@ const works = defineCollection({
 		pubDate: z.coerce.date(),
 		updatedDate: z.coerce.date().optional(),
 		heroImage: z.string().optional(),
-		tags: z.array(z.string()).optional(),
+		tags: z.array(z.string()).optional(), // mise à jour ici
+
 		auteur: z.string().optional(),
 		link: z.string().optional(),
 	}),

@@ -2,7 +2,7 @@
 title: 'Digital Cleanup Day'
 description: "Dans ce projet, j'ai du réalisé le site d'une association appelé le Digital Cleanup Day afin de permettre à l'utilisateur le concept de l'évènement et les invité à y participer tout en pensant à la conception eco-friendly du site. J'ai aussi du réalisés des posts sur les réseaux sociaux afin de promouvoir l'évènement ainsi que créer des newsletter et faire une publicité en motion design "
 pubDate: 'Jan 14 2025'
-heroImage: '/digitalcleanupday.svg'
+heroImage: 'Portfolio/digitalcleanupday.svg'
 tags: ["Webdesign", "After Effects","Gestion de Projet"]
 
 ---

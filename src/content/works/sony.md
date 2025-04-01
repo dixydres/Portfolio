@@ -6,7 +6,7 @@ description: "Pour ce projet nous avons du créer une boutique de E-commerce ave
                             bînome à
                             l’aide de Wordpress et du plugin Woocomerce "
 pubDate: 'Nov 10 2024'
-heroImage: '/sony.svg'
+heroImage: '/Portfolio/sony.svg'
 
 ---
 

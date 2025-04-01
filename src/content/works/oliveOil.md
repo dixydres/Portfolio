@@ -4,7 +4,7 @@ description: "J’ai réalisé une landing page pour une marque fictive appelé
                             “Olive
                             Oil” qui vends de l’huile d’olive premium 100% italienne. "
 pubDate: 'Dec 2 2024'
-heroImage: '/oliveoil.svg'
+heroImage: '/Portfolio/oliveoil.svg'
 # link: "https://www.figma.com/proto/wNJIXKwMYBS6FmfcZ7NzZM/Jean-Jose-Muller---Olive-Oil?page-id=3%3A169&node-id=219-6785&node-type=frame&viewport=385%2C517%2C0.02&t=tpjvbaedEdhIGlEU-1&scaling=min-zoom&content-scaling=fixed&starting-point-node-id=219%3A6785&show-proto-sidebar=1"
 tags: ["Webdesign"]
 ---

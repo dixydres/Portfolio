@@ -4,7 +4,7 @@
 title: 'Little Horses'
 description: "Voici Little Horses, un bar à thème de jeu de société situé à copenhague fictif pour lequel j'ai du réaliser toute la communication graphique "
 pubDate: 'Feb 18 2025'
-heroImage: '/littlehorses.svg'
+heroImage: '/Portfolio/littlehorses.svg'
 tags: ["Webdesign","Gestion de Projet","Branding"]
 
 ---
