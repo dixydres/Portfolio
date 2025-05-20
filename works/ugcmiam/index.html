@@ -1,65 +1,43 @@
 <!DOCTYPE html><html lang="fr"> <head><!-- Global Metadata --><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" type="image/jpeg" href="/Portfolio/Muller_Photo.jpeg"><link rel="apple-touch-icon" href="/Portfolio/Muller_Photo.jpeg"><!-- Asset path handling --><script>
-  window.portfolioBase = '/Portfolio';
-  
-  function fixAssetPath(url) {
-    if (!url || url.startsWith('http') || url.startsWith('data:') || url.startsWith('blob:')) return url;
-    
-    // Remove any duplicate /Portfolio prefixes
-    while (url.includes('/Portfolio/Portfolio/')) {
-      url = url.replace('/Portfolio/Portfolio/', '/Portfolio/');
-    }
-    
-    // Ensure single /Portfolio prefix
-    if (!url.startsWith('/Portfolio')) {
-      url = url.startsWith('/') ? `/Portfolio${url}` : `/Portfolio/${url}`;
-    }
-    
-    return url;
-  }
+    window.portfolioBase = "/Portfolio";
 
-  // Fix all asset paths after DOM loads
-  document.addEventListener('DOMContentLoaded', function() {
-    // Fix stylesheet paths
-    document.querySelectorAll('link[rel="stylesheet"]').forEach(link => {
-      const href = link.getAttribute('href');
-      if (href) link.setAttribute('href', fixAssetPath(href));
-    });
-
-    // Fix image paths
-    document.querySelectorAll('img[src]').forEach(img => {
-      const src = img.getAttribute('src');
-      if (src) img.setAttribute('src', fixAssetPath(src));
-    });
-
-    // Fix video sources
-    document.querySelectorAll('source[src]').forEach(source => {
-      const src = source.getAttribute('src');
-      if (src) source.setAttribute('src', fixAssetPath(src));
-    });
-
-    // Fix background images
-    document.querySelectorAll('*[style*="url("]').forEach(el => {
-      const style = el.getAttribute('style');
-      if (style) {
-        el.setAttribute('style', style.replace(
-          /url\(['"]?([^'")\s]+)['"]?\)/g,
-          (match, url) => `url('${fixAssetPath(url)}')`
-        ));
-      }
-    });
-  });
-
-<!-- Ensure assets are loaded with correct base path -->
-<script>
     function fixAssetPath(url) {
-        if (url.startsWith("http://") || url.startsWith("https://")) return url;
-        if (url.startsWith("/Portfolio/")) return url;
-        return url.startsWith("/") ? `/Portfolio${url}` : `/Portfolio/${url}`;
+        if (
+            !url ||
+            url.startsWith("http") ||
+            url.startsWith("data:") ||
+            url.startsWith("blob:") ||
+            url.startsWith("mailto:") ||
+            url.startsWith("#")
+        ) {
+            return url;
+        }
+
+        // Clean up the URL and normalize slashes
+        url = url.replace(/\/+/g, "/");
+
+        // Remove duplicate Portfolio prefixes
+        while (url.includes("/Portfolio/Portfolio/")) {
+            url = url.replace("/Portfolio/Portfolio/", "/Portfolio/");
+        }
+
+        // Remove trailing slashes
+        url = url.replace(/\/+$/, "");
+
+        // Ensure Portfolio prefix
+        if (!url.startsWith("/Portfolio/")) {
+            url = url.startsWith("/")
+                ? `/Portfolio${url}`
+                : `/Portfolio/${url}`;
+        }
+
+        // Final cleanup of any double slashes
+        return url.replace(/\/+/g, "/");
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
+    function fixAllAssetPaths() {
         // Fix stylesheet paths
-        document.querySelectorAll("link[rel='stylesheet']").forEach((link) => {
+        document.querySelectorAll('link[rel="stylesheet"]').forEach((link) => {
             const href = link.getAttribute("href");
             if (href) link.setAttribute("href", fixAssetPath(href));
         });
@@ -76,25 +54,47 @@
             if (src) source.setAttribute("src", fixAssetPath(src));
         });
 
+        // Fix anchor hrefs
+        document.querySelectorAll("a[href]").forEach((a) => {
+            const href = a.getAttribute("href");
+            if (
+                href &&
+                !href.startsWith("http") &&
+                !href.startsWith("mailto:") &&
+                !href.startsWith("#")
+            ) {
+                a.setAttribute("href", fixAssetPath(href));
+            }
+        });
+
         // Fix background images in CSS
-        document
-            .querySelectorAll("[style*='background-image']")
-            .forEach((el) => {
-                const style = el.getAttribute("style");
-                if (style) {
-                    el.setAttribute(
-                        "style",
-                        style.replace(
-                            /url\(['"]?([^'"]*?)['"]?\)/g,
-                            (match, url) => `url('${fixAssetPath(url)}')`,
-                        ),
-                    );
-                }
-            });
+        document.querySelectorAll('[style*="url("]').forEach((el) => {
+            const style = el.getAttribute("style");
+            if (style) {
+                el.setAttribute(
+                    "style",
+                    style.replace(
+                        /url\(['"]?([^'")\s]+)['"]?\)/g,
+                        (match, url) => `url('${fixAssetPath(url)}')`,
+                    ),
+                );
+            }
+        });
+    }
+
+    // Fix paths on initial load
+    document.addEventListener("DOMContentLoaded", fixAllAssetPaths);
+
+    // Fix paths after any dynamic content updates
+    const observer = new MutationObserver(fixAllAssetPaths);
+    observer.observe(document.documentElement, {
+        childList: true,
+        subtree: true,
     });
-</script><meta name="generator" content="Astro v5.7.13"><!-- Primary Meta Tags --><title>UGC Miam</title><meta name="title" content="UGC Miam"><meta name="description" content="Création d'une identité visuelle et de packagings pour une marque fictive de snacks inspirés de différents genres cinématographiques : science-fiction, western, romance."><!-- Open Graph / Facebook --><meta property="og:type" content="website"><meta property="og:url" content="https://dixydres.github.io/Portfolio/works/ugcmiam/"><meta property="og:title" content="UGC Miam"><meta property="og:description" content="Création d'une identité visuelle et de packagings pour une marque fictive de snacks inspirés de différents genres cinématographiques : science-fiction, western, romance."><meta property="og:image" content="https://dixydres.github.io/Portfolio/Muller_Photo.jpeg"><!-- Twitter --><meta property="twitter:card" content="summary_large_image"><meta property="twitter:url" content="https://dixydres.github.io/Portfolio/works/ugcmiam/"><meta property="twitter:title" content="UGC Miam"><meta property="twitter:description" content="Création d'une identité visuelle et de packagings pour une marque fictive de snacks inspirés de différents genres cinématographiques : science-fiction, western, romance."><meta property="twitter:image" content="https://dixydres.github.io/Portfolio/Muller_Photo.jpeg"><!-- Fonts and Styles --><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css"><script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r150/three.min.js"></script><script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script><link rel="stylesheet" href="/Portfolio/styles/style.CrmcWLEY.css"></head> <body> <div class="container"> <header class="nav-bar" data-astro-cid-dmqpwcec> <div class="nav-container" data-astro-cid-dmqpwcec> <div class="nav-logo" data-astro-cid-dmqpwcec> <a href="/Portfolio/" class="nav-name" style="text-decoration:none;" data-astro-cid-dmqpwcec>
+</script><meta name="generator" content="Astro v5.7.13"><!-- Primary Meta Tags --><title>UGC Miam</title><meta name="title" content="UGC Miam"><meta name="description" content="Création d'une identité visuelle et de packagings pour une marque fictive de snacks inspirés de différents genres cinématographiques : science-fiction, western, romance."><!-- Open Graph / Facebook --><meta property="og:type" content="website"><meta property="og:url" content="http://localhost:4321/works/ugcmiam/"><meta property="og:title" content="UGC Miam"><meta property="og:description" content="Création d'une identité visuelle et de packagings pour une marque fictive de snacks inspirés de différents genres cinématographiques : science-fiction, western, romance."><meta property="og:image" content="http://localhost:4321/Portfolio/Muller_Photo.jpeg"><!-- Twitter --><meta property="twitter:card" content="summary_large_image"><meta property="twitter:url" content="http://localhost:4321/works/ugcmiam/"><meta property="twitter:title" content="UGC Miam"><meta property="twitter:description" content="Création d'une identité visuelle et de packagings pour une marque fictive de snacks inspirés de différents genres cinématographiques : science-fiction, western, romance."><meta property="twitter:image" content="http://localhost:4321/Portfolio/Muller_Photo.jpeg"><!-- Fonts and Styles --><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css"><script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r150/three.min.js"></script><script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script><link rel="stylesheet" href="/_astro/_slug_.CLde6d0a.css">
+<link rel="stylesheet" href="/_astro/_slug_.DGEfHz31.css"></head> <body> <div class="container"> <header class="nav-bar" data-astro-cid-dmqpwcec> <div class="nav-container" data-astro-cid-dmqpwcec> <div class="nav-logo" data-astro-cid-dmqpwcec> <a href="/Portfolio/" class="nav-name" style="text-decoration:none;" data-astro-cid-dmqpwcec>
 Muller Jean-José
-</a> </div> <button class="mobile-menu-toggle" aria-label="Menu" data-astro-cid-dmqpwcec> <span class="bar" data-astro-cid-dmqpwcec></span> <span class="bar" data-astro-cid-dmqpwcec></span> <span class="bar" data-astro-cid-dmqpwcec></span> </button> <nav class="nav-menu" data-astro-cid-dmqpwcec> <ul class="nav-link" data-astro-cid-dmqpwcec> <li data-astro-cid-dmqpwcec><a href="/Portfolio/" data-astro-cid-dmqpwcec>Accueil</a></li> <li data-astro-cid-dmqpwcec><a href="/Portfolio/about" data-astro-cid-dmqpwcec>À propos</a></li> <li data-astro-cid-dmqpwcec><a href="/Portfolio/works" data-astro-cid-dmqpwcec>Projets</a></li> <li data-astro-cid-dmqpwcec> <a href="/Portfolio/#contact" class="contact-btn" data-astro-cid-dmqpwcec>Contact</a> </li> </ul> </nav> </div> </header> <script type="module" src="/Portfolio/Portfolio/Portfolio/js/Nav.astro_astro_type_script_index_0_lang.BB-vzxjg.js"></script>  <main>  <a href="/Portfolio/works/" class="back-to-top" data-astro-cid-eo3wme6m> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-eo3wme6m><line x1="19" y1="12" x2="5" y2="12" data-astro-cid-eo3wme6m></line><polyline points="12 19 5 12 12 5" data-astro-cid-eo3wme6m></polyline></svg> <span data-astro-cid-eo3wme6m>Retour</span> </a> <article class="post" data-astro-cid-eo3wme6m> <div class="hero" data-astro-cid-eo3wme6m> <img src="/Portfolio/UGC_Minia.svg" alt="UGC Miam" class="hero-image" data-astro-cid-eo3wme6m> <div class="hero-overlay" data-astro-cid-eo3wme6m></div> <div class="hero-content" data-astro-cid-eo3wme6m> <h1 class="title" data-astro-cid-eo3wme6m>UGC Miam</h1> <p class="description" data-astro-cid-eo3wme6m>Création d&#39;une identité visuelle et de packagings pour une marque fictive de snacks inspirés de différents genres cinématographiques : science-fiction, western, romance.</p> <div class="post-meta" data-astro-cid-eo3wme6m> <div class="date-container" data-astro-cid-eo3wme6m> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-eo3wme6m><rect x="3" y="4" width="18" height="18" rx="2" ry="2" data-astro-cid-eo3wme6m></rect><line x1="16" y1="2" x2="16" y2="6" data-astro-cid-eo3wme6m></line><line x1="8" y1="2" x2="8" y2="6" data-astro-cid-eo3wme6m></line><line x1="3" y1="10" x2="21" y2="10" data-astro-cid-eo3wme6m></line></svg> <time datetime="2023-10-12T00:00:00.000Z"> 12 octobre 2023 </time> </div>   </div> <div class="post-tags" data-astro-cid-eo3wme6m> <span class="tag" data-astro-cid-eo3wme6m>Identité visuelle</span><span class="tag" data-astro-cid-eo3wme6m>Packaging</span><span class="tag" data-astro-cid-eo3wme6m>Design graphique</span> </div> </div> </div> <div class="prose" data-astro-cid-apjhz64k>  <h1 id="ugc-miam">UGC Miam 🍫🎬</h1>
+</a> </div> <button class="mobile-menu-toggle" aria-label="Menu" data-astro-cid-dmqpwcec> <span class="bar" data-astro-cid-dmqpwcec></span> <span class="bar" data-astro-cid-dmqpwcec></span> <span class="bar" data-astro-cid-dmqpwcec></span> </button> <nav class="nav-menu" data-astro-cid-dmqpwcec> <ul class="nav-link" data-astro-cid-dmqpwcec> <li data-astro-cid-dmqpwcec><a href="/Portfolio/" data-astro-cid-dmqpwcec>Accueil</a></li> <li data-astro-cid-dmqpwcec><a href="/Portfolio/about" data-astro-cid-dmqpwcec>À propos</a></li> <li data-astro-cid-dmqpwcec><a href="/Portfolio/works" data-astro-cid-dmqpwcec>Projets</a></li> <li data-astro-cid-dmqpwcec> <a href="/Portfolio/#contact" class="contact-btn" data-astro-cid-dmqpwcec>Contact</a> </li> </ul> </nav> </div> </header> <script type="module">document.addEventListener("DOMContentLoaded",()=>{const t=document.querySelector(".mobile-menu-toggle"),e=document.querySelector(".nav-menu"),n=document.body;t&&e&&t.addEventListener("click",()=>{t.classList.toggle("active"),e.classList.toggle("active"),n.style.overflow=e.classList.contains("active")?"hidden":""}),document.addEventListener("click",c=>{e?.classList.contains("active")&&!e.contains(c.target)&&!t?.contains(c.target)&&(t?.classList.remove("active"),e.classList.remove("active"),n.style.overflow="")}),document.querySelectorAll(".nav-link a").forEach(c=>{c.addEventListener("click",()=>{const o=document.querySelector(".mobile-menu-toggle"),s=document.querySelector(".nav-menu");o&&s&&(o.classList.remove("active"),s.classList.remove("active"))})})});</script>  <main>  <a href="/Portfolio/works/" class="back-to-top" data-astro-cid-eo3wme6m> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-eo3wme6m><line x1="19" y1="12" x2="5" y2="12" data-astro-cid-eo3wme6m></line><polyline points="12 19 5 12 12 5" data-astro-cid-eo3wme6m></polyline></svg> <span data-astro-cid-eo3wme6m>Retour</span> </a> <article class="post" data-astro-cid-eo3wme6m> <div class="hero" data-astro-cid-eo3wme6m> <img src="/Portfolio/public/Portfolio/UGC_Minia.svg" alt="UGC Miam" class="hero-image" data-astro-cid-eo3wme6m> <div class="hero-overlay" data-astro-cid-eo3wme6m></div> <div class="hero-content" data-astro-cid-eo3wme6m> <h1 class="title" data-astro-cid-eo3wme6m>UGC Miam</h1> <p class="description" data-astro-cid-eo3wme6m>Création d&#39;une identité visuelle et de packagings pour une marque fictive de snacks inspirés de différents genres cinématographiques : science-fiction, western, romance.</p> <div class="post-meta" data-astro-cid-eo3wme6m> <div class="date-container" data-astro-cid-eo3wme6m> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-eo3wme6m><rect x="3" y="4" width="18" height="18" rx="2" ry="2" data-astro-cid-eo3wme6m></rect><line x1="16" y1="2" x2="16" y2="6" data-astro-cid-eo3wme6m></line><line x1="8" y1="2" x2="8" y2="6" data-astro-cid-eo3wme6m></line><line x1="3" y1="10" x2="21" y2="10" data-astro-cid-eo3wme6m></line></svg> <time datetime="2023-10-12T00:00:00.000Z"> 12 octobre 2023 </time> </div>   </div> <div class="post-tags" data-astro-cid-eo3wme6m> <span class="tag" data-astro-cid-eo3wme6m>Identité visuelle</span><span class="tag" data-astro-cid-eo3wme6m>Packaging</span><span class="tag" data-astro-cid-eo3wme6m>Design graphique</span> </div> </div> </div> <div class="prose" data-astro-cid-apjhz64k>  <h1 id="ugc-miam">UGC Miam 🍫🎬</h1>
 <p><strong>UGC Miam</strong> est un projet de création visuelle pour une marque fictive de snacks destinés à accompagner des séances de cinéma. Chaque produit reprend les codes graphiques d’un genre cinématographique différent : <strong>science-fiction</strong>, <strong>romance</strong>, <strong>western</strong>.</p>
 <p>J’ai conçu l’identité visuelle de la marque et l’ensemble des packagings de A à Z, sans utiliser InDesign. Tout a été pensé dans un esprit de cohérence de marque et de storytelling graphique.</p>
 <hr>
@@ -218,4 +218,4 @@ Retour aux projets
                     once: true,
                 });
             });
-        </script> </body> </html>   <script type="module" src="/Portfolio/Portfolio/Portfolio/js/ProjectLayout.astro_astro_type_script_index_0_lang.JrmuN1F6.js"></script>
+        </script> </body> </html>   <script type="module">document.addEventListener("astro:page-load",()=>{const t=document.querySelector(".carousel");if(!t)return;const u=t.querySelector(".carousel-container"),c=t.querySelectorAll(".carousel-slide"),l=t.querySelector(".carousel-dots"),d=t.querySelector(".prev"),v=t.querySelector(".next");if(!u||!l||!c.length)return;let s=0;const i=c.length;function E(e){u.style.transform=`translateX(-${e*100}%)`,l.querySelectorAll(".dot").forEach((n,r)=>{r===e?(n.classList.add("active"),n.setAttribute("aria-current","true")):(n.classList.remove("active"),n.removeAttribute("aria-current"))})}function a(e){s=(e%i+i)%i,E(s)}c.forEach((e,n)=>{const r=document.createElement("button");r.classList.add("dot"),r.setAttribute("aria-label",`Image ${n+1}`),n===0&&(r.classList.add("active"),r.setAttribute("aria-current","true")),r.addEventListener("click",()=>a(n)),l.appendChild(r)}),d&&d.addEventListener("click",()=>a(s-1)),v&&v.addEventListener("click",()=>a(s+1));let f=0;t.addEventListener("touchstart",e=>{f=e.touches[0].clientX},{passive:!0}),t.addEventListener("touchend",e=>{const n=e.changedTouches[0].clientX,r=f-n;Math.abs(r)>50&&a(r>0?s+1:s-1)},{passive:!0});const y=e=>{e.key==="ArrowLeft"?a(s-1):e.key==="ArrowRight"&&a(s+1)};document.addEventListener("keydown",y);let L=!1;const h=setInterval(()=>{L||a(s+1)},5e3),o=e=>{L=e};return t.addEventListener("mouseenter",()=>o(!0)),t.addEventListener("mouseleave",()=>o(!1)),t.addEventListener("focusin",()=>o(!0)),t.addEventListener("focusout",()=>o(!1)),()=>{clearInterval(h),document.removeEventListener("keydown",y)}});</script>

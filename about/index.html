@@ -1,65 +1,43 @@
 <!DOCTYPE html><html lang="fr"> <head><!-- Global Metadata --><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" type="image/jpeg" href="/Portfolio/Muller_Photo.jpeg"><link rel="apple-touch-icon" href="/Portfolio/Muller_Photo.jpeg"><!-- Asset path handling --><script>
-  window.portfolioBase = '/Portfolio';
-  
-  function fixAssetPath(url) {
-    if (!url || url.startsWith('http') || url.startsWith('data:') || url.startsWith('blob:')) return url;
-    
-    // Remove any duplicate /Portfolio prefixes
-    while (url.includes('/Portfolio/Portfolio/')) {
-      url = url.replace('/Portfolio/Portfolio/', '/Portfolio/');
-    }
-    
-    // Ensure single /Portfolio prefix
-    if (!url.startsWith('/Portfolio')) {
-      url = url.startsWith('/') ? `/Portfolio${url}` : `/Portfolio/${url}`;
-    }
-    
-    return url;
-  }
+    window.portfolioBase = "/Portfolio";
 
-  // Fix all asset paths after DOM loads
-  document.addEventListener('DOMContentLoaded', function() {
-    // Fix stylesheet paths
-    document.querySelectorAll('link[rel="stylesheet"]').forEach(link => {
-      const href = link.getAttribute('href');
-      if (href) link.setAttribute('href', fixAssetPath(href));
-    });
-
-    // Fix image paths
-    document.querySelectorAll('img[src]').forEach(img => {
-      const src = img.getAttribute('src');
-      if (src) img.setAttribute('src', fixAssetPath(src));
-    });
-
-    // Fix video sources
-    document.querySelectorAll('source[src]').forEach(source => {
-      const src = source.getAttribute('src');
-      if (src) source.setAttribute('src', fixAssetPath(src));
-    });
-
-    // Fix background images
-    document.querySelectorAll('*[style*="url("]').forEach(el => {
-      const style = el.getAttribute('style');
-      if (style) {
-        el.setAttribute('style', style.replace(
-          /url\(['"]?([^'")\s]+)['"]?\)/g,
-          (match, url) => `url('${fixAssetPath(url)}')`
-        ));
-      }
-    });
-  });
-
-<!-- Ensure assets are loaded with correct base path -->
-<script>
     function fixAssetPath(url) {
-        if (url.startsWith("http://") || url.startsWith("https://")) return url;
-        if (url.startsWith("/Portfolio/")) return url;
-        return url.startsWith("/") ? `/Portfolio${url}` : `/Portfolio/${url}`;
+        if (
+            !url ||
+            url.startsWith("http") ||
+            url.startsWith("data:") ||
+            url.startsWith("blob:") ||
+            url.startsWith("mailto:") ||
+            url.startsWith("#")
+        ) {
+            return url;
+        }
+
+        // Clean up the URL and normalize slashes
+        url = url.replace(/\/+/g, "/");
+
+        // Remove duplicate Portfolio prefixes
+        while (url.includes("/Portfolio/Portfolio/")) {
+            url = url.replace("/Portfolio/Portfolio/", "/Portfolio/");
+        }
+
+        // Remove trailing slashes
+        url = url.replace(/\/+$/, "");
+
+        // Ensure Portfolio prefix
+        if (!url.startsWith("/Portfolio/")) {
+            url = url.startsWith("/")
+                ? `/Portfolio${url}`
+                : `/Portfolio/${url}`;
+        }
+
+        // Final cleanup of any double slashes
+        return url.replace(/\/+/g, "/");
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
+    function fixAllAssetPaths() {
         // Fix stylesheet paths
-        document.querySelectorAll("link[rel='stylesheet']").forEach((link) => {
+        document.querySelectorAll('link[rel="stylesheet"]').forEach((link) => {
             const href = link.getAttribute("href");
             if (href) link.setAttribute("href", fixAssetPath(href));
         });
@@ -76,25 +54,47 @@
             if (src) source.setAttribute("src", fixAssetPath(src));
         });
 
+        // Fix anchor hrefs
+        document.querySelectorAll("a[href]").forEach((a) => {
+            const href = a.getAttribute("href");
+            if (
+                href &&
+                !href.startsWith("http") &&
+                !href.startsWith("mailto:") &&
+                !href.startsWith("#")
+            ) {
+                a.setAttribute("href", fixAssetPath(href));
+            }
+        });
+
         // Fix background images in CSS
-        document
-            .querySelectorAll("[style*='background-image']")
-            .forEach((el) => {
-                const style = el.getAttribute("style");
-                if (style) {
-                    el.setAttribute(
-                        "style",
-                        style.replace(
-                            /url\(['"]?([^'"]*?)['"]?\)/g,
-                            (match, url) => `url('${fixAssetPath(url)}')`,
-                        ),
-                    );
-                }
-            });
+        document.querySelectorAll('[style*="url("]').forEach((el) => {
+            const style = el.getAttribute("style");
+            if (style) {
+                el.setAttribute(
+                    "style",
+                    style.replace(
+                        /url\(['"]?([^'")\s]+)['"]?\)/g,
+                        (match, url) => `url('${fixAssetPath(url)}')`,
+                    ),
+                );
+            }
+        });
+    }
+
+    // Fix paths on initial load
+    document.addEventListener("DOMContentLoaded", fixAllAssetPaths);
+
+    // Fix paths after any dynamic content updates
+    const observer = new MutationObserver(fixAllAssetPaths);
+    observer.observe(document.documentElement, {
+        childList: true,
+        subtree: true,
     });
-</script><meta name="generator" content="Astro v5.7.13"><!-- Primary Meta Tags --><title>À propos | Jean-José Muller</title><meta name="title" content="À propos | Jean-José Muller"><meta name="description" content="Portfolio de Jean-José Muller, étudiant dans les métiers du multimédia et de l'internet"><!-- Open Graph / Facebook --><meta property="og:type" content="website"><meta property="og:url" content="https://dixydres.github.io/Portfolio/about/"><meta property="og:title" content="À propos | Jean-José Muller"><meta property="og:description" content="Portfolio de Jean-José Muller, étudiant dans les métiers du multimédia et de l'internet"><meta property="og:image" content="https://dixydres.github.io/Portfolio/Muller_Photo.jpeg"><!-- Twitter --><meta property="twitter:card" content="summary_large_image"><meta property="twitter:url" content="https://dixydres.github.io/Portfolio/about/"><meta property="twitter:title" content="À propos | Jean-José Muller"><meta property="twitter:description" content="Portfolio de Jean-José Muller, étudiant dans les métiers du multimédia et de l'internet"><meta property="twitter:image" content="https://dixydres.github.io/Portfolio/Muller_Photo.jpeg"><!-- Fonts and Styles --><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css"><script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r150/three.min.js"></script><script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script><link rel="stylesheet" href="/Portfolio/styles/style.CrmcWLEY.css"></head> <body> <div class="container"> <header class="nav-bar" data-astro-cid-dmqpwcec> <div class="nav-container" data-astro-cid-dmqpwcec> <div class="nav-logo" data-astro-cid-dmqpwcec> <a href="/Portfolio/" class="nav-name" style="text-decoration:none;" data-astro-cid-dmqpwcec>
+</script><meta name="generator" content="Astro v5.7.13"><!-- Primary Meta Tags --><title>À propos | Jean-José Muller</title><meta name="title" content="À propos | Jean-José Muller"><meta name="description" content="Portfolio de Jean-José Muller, étudiant dans les métiers du multimédia et de l'internet"><!-- Open Graph / Facebook --><meta property="og:type" content="website"><meta property="og:url" content="http://localhost:4321/about/"><meta property="og:title" content="À propos | Jean-José Muller"><meta property="og:description" content="Portfolio de Jean-José Muller, étudiant dans les métiers du multimédia et de l'internet"><meta property="og:image" content="http://localhost:4321/Portfolio/Muller_Photo.jpeg"><!-- Twitter --><meta property="twitter:card" content="summary_large_image"><meta property="twitter:url" content="http://localhost:4321/about/"><meta property="twitter:title" content="À propos | Jean-José Muller"><meta property="twitter:description" content="Portfolio de Jean-José Muller, étudiant dans les métiers du multimédia et de l'internet"><meta property="twitter:image" content="http://localhost:4321/Portfolio/Muller_Photo.jpeg"><!-- Fonts and Styles --><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css"><script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r150/three.min.js"></script><script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script><link rel="stylesheet" href="/_astro/about.DKsg87x_.css">
+<link rel="stylesheet" href="/_astro/_slug_.DGEfHz31.css"></head> <body> <div class="container"> <header class="nav-bar" data-astro-cid-dmqpwcec> <div class="nav-container" data-astro-cid-dmqpwcec> <div class="nav-logo" data-astro-cid-dmqpwcec> <a href="/Portfolio/" class="nav-name" style="text-decoration:none;" data-astro-cid-dmqpwcec>
 Muller Jean-José
-</a> </div> <button class="mobile-menu-toggle" aria-label="Menu" data-astro-cid-dmqpwcec> <span class="bar" data-astro-cid-dmqpwcec></span> <span class="bar" data-astro-cid-dmqpwcec></span> <span class="bar" data-astro-cid-dmqpwcec></span> </button> <nav class="nav-menu" data-astro-cid-dmqpwcec> <ul class="nav-link" data-astro-cid-dmqpwcec> <li data-astro-cid-dmqpwcec><a href="/Portfolio/" data-astro-cid-dmqpwcec>Accueil</a></li> <li data-astro-cid-dmqpwcec><a href="/Portfolio/about" data-astro-cid-dmqpwcec>À propos</a></li> <li data-astro-cid-dmqpwcec><a href="/Portfolio/works" data-astro-cid-dmqpwcec>Projets</a></li> <li data-astro-cid-dmqpwcec> <a href="/Portfolio/#contact" class="contact-btn" data-astro-cid-dmqpwcec>Contact</a> </li> </ul> </nav> </div> </header> <script type="module" src="/Portfolio/Portfolio/Portfolio/js/Nav.astro_astro_type_script_index_0_lang.BB-vzxjg.js"></script>  <main>   <div class="about-hero" data-astro-cid-kh7btl4r> <div class="about-hero-content" data-astro-cid-kh7btl4r> <h1 data-aos="fade-up" data-astro-cid-kh7btl4r>À propos de moi</h1> <div class="about-divider" data-aos="fade-up" data-aos-delay="100" data-astro-cid-kh7btl4r></div> <p class="about-subtitle" data-aos="fade-up" data-aos-delay="200" data-astro-cid-kh7btl4r>
+</a> </div> <button class="mobile-menu-toggle" aria-label="Menu" data-astro-cid-dmqpwcec> <span class="bar" data-astro-cid-dmqpwcec></span> <span class="bar" data-astro-cid-dmqpwcec></span> <span class="bar" data-astro-cid-dmqpwcec></span> </button> <nav class="nav-menu" data-astro-cid-dmqpwcec> <ul class="nav-link" data-astro-cid-dmqpwcec> <li data-astro-cid-dmqpwcec><a href="/Portfolio/" data-astro-cid-dmqpwcec>Accueil</a></li> <li data-astro-cid-dmqpwcec><a href="/Portfolio/about" data-astro-cid-dmqpwcec>À propos</a></li> <li data-astro-cid-dmqpwcec><a href="/Portfolio/works" data-astro-cid-dmqpwcec>Projets</a></li> <li data-astro-cid-dmqpwcec> <a href="/Portfolio/#contact" class="contact-btn" data-astro-cid-dmqpwcec>Contact</a> </li> </ul> </nav> </div> </header> <script type="module">document.addEventListener("DOMContentLoaded",()=>{const t=document.querySelector(".mobile-menu-toggle"),e=document.querySelector(".nav-menu"),n=document.body;t&&e&&t.addEventListener("click",()=>{t.classList.toggle("active"),e.classList.toggle("active"),n.style.overflow=e.classList.contains("active")?"hidden":""}),document.addEventListener("click",c=>{e?.classList.contains("active")&&!e.contains(c.target)&&!t?.contains(c.target)&&(t?.classList.remove("active"),e.classList.remove("active"),n.style.overflow="")}),document.querySelectorAll(".nav-link a").forEach(c=>{c.addEventListener("click",()=>{const o=document.querySelector(".mobile-menu-toggle"),s=document.querySelector(".nav-menu");o&&s&&(o.classList.remove("active"),s.classList.remove("active"))})})});</script>  <main>   <div class="about-hero" data-astro-cid-kh7btl4r> <div class="about-hero-content" data-astro-cid-kh7btl4r> <h1 data-aos="fade-up" data-astro-cid-kh7btl4r>À propos de moi</h1> <div class="about-divider" data-aos="fade-up" data-aos-delay="100" data-astro-cid-kh7btl4r></div> <p class="about-subtitle" data-aos="fade-up" data-aos-delay="200" data-astro-cid-kh7btl4r>
 Découvrez mon parcours, mes compétences et mes ambitions
 </p> </div> <div class="hero-shapes" data-astro-cid-kh7btl4r> <div class="shape shape-1" data-astro-cid-kh7btl4r></div> <div class="shape shape-2" data-astro-cid-kh7btl4r></div> <div class="shape shape-3" data-astro-cid-kh7btl4r></div> </div> </div> <section class="about-section page-section" data-astro-cid-kh7btl4r> <div class="about-header" data-aos="fade-up" data-astro-cid-kh7btl4r> <div class="about-image-container" data-astro-cid-kh7btl4r> <div class="about-image-border" data-astro-cid-kh7btl4r></div> <div class="about-image" data-astro-cid-kh7btl4r> <img src="/Portfolio/Muller_Photo.jpeg" alt="Jean-José Muller" data-astro-cid-kh7btl4r> </div> <div class="about-image-dot dot-1" data-astro-cid-kh7btl4r></div> <div class="about-image-dot dot-2" data-astro-cid-kh7btl4r></div> <div class="about-image-dot dot-3" data-astro-cid-kh7btl4r></div> </div> <div class="about-intro" data-astro-cid-kh7btl4r> <h2 data-astro-cid-kh7btl4r>Jean-José <span class="text-gradient" data-astro-cid-kh7btl4r>Muller</span></h2> <p class="subtitle" data-astro-cid-kh7btl4r>
 Étudiant dans les métiers du multimédia et de l'internet

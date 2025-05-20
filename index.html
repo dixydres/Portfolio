@@ -1,65 +1,43 @@
 <!DOCTYPE html><html lang="fr"> <head><!-- Global Metadata --><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" type="image/jpeg" href="/Portfolio/Muller_Photo.jpeg"><link rel="apple-touch-icon" href="/Portfolio/Muller_Photo.jpeg"><!-- Asset path handling --><script>
-  window.portfolioBase = '/Portfolio';
-  
-  function fixAssetPath(url) {
-    if (!url || url.startsWith('http') || url.startsWith('data:') || url.startsWith('blob:')) return url;
-    
-    // Remove any duplicate /Portfolio prefixes
-    while (url.includes('/Portfolio/Portfolio/')) {
-      url = url.replace('/Portfolio/Portfolio/', '/Portfolio/');
-    }
-    
-    // Ensure single /Portfolio prefix
-    if (!url.startsWith('/Portfolio')) {
-      url = url.startsWith('/') ? `/Portfolio${url}` : `/Portfolio/${url}`;
-    }
-    
-    return url;
-  }
+    window.portfolioBase = "/Portfolio";
 
-  // Fix all asset paths after DOM loads
-  document.addEventListener('DOMContentLoaded', function() {
-    // Fix stylesheet paths
-    document.querySelectorAll('link[rel="stylesheet"]').forEach(link => {
-      const href = link.getAttribute('href');
-      if (href) link.setAttribute('href', fixAssetPath(href));
-    });
-
-    // Fix image paths
-    document.querySelectorAll('img[src]').forEach(img => {
-      const src = img.getAttribute('src');
-      if (src) img.setAttribute('src', fixAssetPath(src));
-    });
-
-    // Fix video sources
-    document.querySelectorAll('source[src]').forEach(source => {
-      const src = source.getAttribute('src');
-      if (src) source.setAttribute('src', fixAssetPath(src));
-    });
-
-    // Fix background images
-    document.querySelectorAll('*[style*="url("]').forEach(el => {
-      const style = el.getAttribute('style');
-      if (style) {
-        el.setAttribute('style', style.replace(
-          /url\(['"]?([^'")\s]+)['"]?\)/g,
-          (match, url) => `url('${fixAssetPath(url)}')`
-        ));
-      }
-    });
-  });
-
-<!-- Ensure assets are loaded with correct base path -->
-<script>
     function fixAssetPath(url) {
-        if (url.startsWith("http://") || url.startsWith("https://")) return url;
-        if (url.startsWith("/Portfolio/")) return url;
-        return url.startsWith("/") ? `/Portfolio${url}` : `/Portfolio/${url}`;
+        if (
+            !url ||
+            url.startsWith("http") ||
+            url.startsWith("data:") ||
+            url.startsWith("blob:") ||
+            url.startsWith("mailto:") ||
+            url.startsWith("#")
+        ) {
+            return url;
+        }
+
+        // Clean up the URL and normalize slashes
+        url = url.replace(/\/+/g, "/");
+
+        // Remove duplicate Portfolio prefixes
+        while (url.includes("/Portfolio/Portfolio/")) {
+            url = url.replace("/Portfolio/Portfolio/", "/Portfolio/");
+        }
+
+        // Remove trailing slashes
+        url = url.replace(/\/+$/, "");
+
+        // Ensure Portfolio prefix
+        if (!url.startsWith("/Portfolio/")) {
+            url = url.startsWith("/")
+                ? `/Portfolio${url}`
+                : `/Portfolio/${url}`;
+        }
+
+        // Final cleanup of any double slashes
+        return url.replace(/\/+/g, "/");
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
+    function fixAllAssetPaths() {
         // Fix stylesheet paths
-        document.querySelectorAll("link[rel='stylesheet']").forEach((link) => {
+        document.querySelectorAll('link[rel="stylesheet"]').forEach((link) => {
             const href = link.getAttribute("href");
             if (href) link.setAttribute("href", fixAssetPath(href));
         });
@@ -76,25 +54,48 @@
             if (src) source.setAttribute("src", fixAssetPath(src));
         });
 
+        // Fix anchor hrefs
+        document.querySelectorAll("a[href]").forEach((a) => {
+            const href = a.getAttribute("href");
+            if (
+                href &&
+                !href.startsWith("http") &&
+                !href.startsWith("mailto:") &&
+                !href.startsWith("#")
+            ) {
+                a.setAttribute("href", fixAssetPath(href));
+            }
+        });
+
         // Fix background images in CSS
-        document
-            .querySelectorAll("[style*='background-image']")
-            .forEach((el) => {
-                const style = el.getAttribute("style");
-                if (style) {
-                    el.setAttribute(
-                        "style",
-                        style.replace(
-                            /url\(['"]?([^'"]*?)['"]?\)/g,
-                            (match, url) => `url('${fixAssetPath(url)}')`,
-                        ),
-                    );
-                }
-            });
+        document.querySelectorAll('[style*="url("]').forEach((el) => {
+            const style = el.getAttribute("style");
+            if (style) {
+                el.setAttribute(
+                    "style",
+                    style.replace(
+                        /url\(['"]?([^'")\s]+)['"]?\)/g,
+                        (match, url) => `url('${fixAssetPath(url)}')`,
+                    ),
+                );
+            }
+        });
+    }
+
+    // Fix paths on initial load
+    document.addEventListener("DOMContentLoaded", fixAllAssetPaths);
+
+    // Fix paths after any dynamic content updates
+    const observer = new MutationObserver(fixAllAssetPaths);
+    observer.observe(document.documentElement, {
+        childList: true,
+        subtree: true,
     });
-</script><meta name="generator" content="Astro v5.7.13"><!-- Primary Meta Tags --><title>Portfolio - Jean-José Muller</title><meta name="title" content="Portfolio - Jean-José Muller"><meta name="description" content="Portfolio de Jean-José Muller, étudiant dans les métiers du multimédia et de l'internet"><!-- Open Graph / Facebook --><meta property="og:type" content="website"><meta property="og:url" content="https://dixydres.github.io/Portfolio"><meta property="og:title" content="Portfolio - Jean-José Muller"><meta property="og:description" content="Portfolio de Jean-José Muller, étudiant dans les métiers du multimédia et de l'internet"><meta property="og:image" content="https://dixydres.github.io/Portfolio/Muller_Photo.jpeg"><!-- Twitter --><meta property="twitter:card" content="summary_large_image"><meta property="twitter:url" content="https://dixydres.github.io/Portfolio"><meta property="twitter:title" content="Portfolio - Jean-José Muller"><meta property="twitter:description" content="Portfolio de Jean-José Muller, étudiant dans les métiers du multimédia et de l'internet"><meta property="twitter:image" content="https://dixydres.github.io/Portfolio/Muller_Photo.jpeg"><!-- Fonts and Styles --><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css"><script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r150/three.min.js"></script><script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script><link rel="stylesheet" href="/Portfolio/styles/style.CrmcWLEY.css"></head> <body> <div class="container"> <header class="nav-bar" data-astro-cid-dmqpwcec> <div class="nav-container" data-astro-cid-dmqpwcec> <div class="nav-logo" data-astro-cid-dmqpwcec> <a href="/Portfolio/" class="nav-name" style="text-decoration:none;" data-astro-cid-dmqpwcec>
+</script><meta name="generator" content="Astro v5.7.13"><!-- Primary Meta Tags --><title>Portfolio - Jean-José Muller</title><meta name="title" content="Portfolio - Jean-José Muller"><meta name="description" content="Portfolio de Jean-José Muller, étudiant dans les métiers du multimédia et de l'internet"><!-- Open Graph / Facebook --><meta property="og:type" content="website"><meta property="og:url" content="http://localhost:4321/"><meta property="og:title" content="Portfolio - Jean-José Muller"><meta property="og:description" content="Portfolio de Jean-José Muller, étudiant dans les métiers du multimédia et de l'internet"><meta property="og:image" content="http://localhost:4321/Portfolio/Muller_Photo.jpeg"><!-- Twitter --><meta property="twitter:card" content="summary_large_image"><meta property="twitter:url" content="http://localhost:4321/"><meta property="twitter:title" content="Portfolio - Jean-José Muller"><meta property="twitter:description" content="Portfolio de Jean-José Muller, étudiant dans les métiers du multimédia et de l'internet"><meta property="twitter:image" content="http://localhost:4321/Portfolio/Muller_Photo.jpeg"><!-- Fonts and Styles --><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css"><script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r150/three.min.js"></script><script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script><link rel="stylesheet" href="/_astro/index.BQwBAdli.css">
+<link rel="stylesheet" href="/_astro/_slug_.DGEfHz31.css">
+<link rel="stylesheet" href="/_astro/index.8VlbsZRf.css"></head> <body> <div class="container"> <header class="nav-bar" data-astro-cid-dmqpwcec> <div class="nav-container" data-astro-cid-dmqpwcec> <div class="nav-logo" data-astro-cid-dmqpwcec> <a href="/Portfolio/" class="nav-name" style="text-decoration:none;" data-astro-cid-dmqpwcec>
 Muller Jean-José
-</a> </div> <button class="mobile-menu-toggle" aria-label="Menu" data-astro-cid-dmqpwcec> <span class="bar" data-astro-cid-dmqpwcec></span> <span class="bar" data-astro-cid-dmqpwcec></span> <span class="bar" data-astro-cid-dmqpwcec></span> </button> <nav class="nav-menu" data-astro-cid-dmqpwcec> <ul class="nav-link" data-astro-cid-dmqpwcec> <li data-astro-cid-dmqpwcec><a href="/Portfolio/" data-astro-cid-dmqpwcec>Accueil</a></li> <li data-astro-cid-dmqpwcec><a href="/Portfolio/about" data-astro-cid-dmqpwcec>À propos</a></li> <li data-astro-cid-dmqpwcec><a href="/Portfolio/works" data-astro-cid-dmqpwcec>Projets</a></li> <li data-astro-cid-dmqpwcec> <a href="/Portfolio/#contact" class="contact-btn" data-astro-cid-dmqpwcec>Contact</a> </li> </ul> </nav> </div> </header> <script type="module" src="/Portfolio/Portfolio/Portfolio/js/Nav.astro_astro_type_script_index_0_lang.BB-vzxjg.js"></script>  <main>  <div class="top" data-astro-cid-j7pv25f6> <section class="hero" id="about" data-astro-cid-bbe6dxrz> <!-- Éléments décoratifs --> <div class="hero-bg-elements" data-astro-cid-bbe6dxrz> <div class="hero-shape1" data-astro-cid-bbe6dxrz></div> <div class="hero-shape2" data-astro-cid-bbe6dxrz></div> <div class="hero-dots" data-astro-cid-bbe6dxrz></div> </div> <div class="hero-content" data-astro-cid-bbe6dxrz> <article class="hero-information" data-aos="fade-up" data-astro-cid-bbe6dxrz> <div class="hero-eyebrow" data-astro-cid-bbe6dxrz> <span class="wave" data-astro-cid-bbe6dxrz>👋</span> Bonjour, je suis
+</a> </div> <button class="mobile-menu-toggle" aria-label="Menu" data-astro-cid-dmqpwcec> <span class="bar" data-astro-cid-dmqpwcec></span> <span class="bar" data-astro-cid-dmqpwcec></span> <span class="bar" data-astro-cid-dmqpwcec></span> </button> <nav class="nav-menu" data-astro-cid-dmqpwcec> <ul class="nav-link" data-astro-cid-dmqpwcec> <li data-astro-cid-dmqpwcec><a href="/Portfolio/" data-astro-cid-dmqpwcec>Accueil</a></li> <li data-astro-cid-dmqpwcec><a href="/Portfolio/about" data-astro-cid-dmqpwcec>À propos</a></li> <li data-astro-cid-dmqpwcec><a href="/Portfolio/works" data-astro-cid-dmqpwcec>Projets</a></li> <li data-astro-cid-dmqpwcec> <a href="/Portfolio/#contact" class="contact-btn" data-astro-cid-dmqpwcec>Contact</a> </li> </ul> </nav> </div> </header> <script type="module">document.addEventListener("DOMContentLoaded",()=>{const t=document.querySelector(".mobile-menu-toggle"),e=document.querySelector(".nav-menu"),n=document.body;t&&e&&t.addEventListener("click",()=>{t.classList.toggle("active"),e.classList.toggle("active"),n.style.overflow=e.classList.contains("active")?"hidden":""}),document.addEventListener("click",c=>{e?.classList.contains("active")&&!e.contains(c.target)&&!t?.contains(c.target)&&(t?.classList.remove("active"),e.classList.remove("active"),n.style.overflow="")}),document.querySelectorAll(".nav-link a").forEach(c=>{c.addEventListener("click",()=>{const o=document.querySelector(".mobile-menu-toggle"),s=document.querySelector(".nav-menu");o&&s&&(o.classList.remove("active"),s.classList.remove("active"))})})});</script>  <main>  <div class="top" data-astro-cid-j7pv25f6> <section class="hero" id="about" data-astro-cid-bbe6dxrz> <!-- Éléments décoratifs --> <div class="hero-bg-elements" data-astro-cid-bbe6dxrz> <div class="hero-shape1" data-astro-cid-bbe6dxrz></div> <div class="hero-shape2" data-astro-cid-bbe6dxrz></div> <div class="hero-dots" data-astro-cid-bbe6dxrz></div> </div> <div class="hero-content" data-astro-cid-bbe6dxrz> <article class="hero-information" data-aos="fade-up" data-astro-cid-bbe6dxrz> <div class="hero-eyebrow" data-astro-cid-bbe6dxrz> <span class="wave" data-astro-cid-bbe6dxrz>👋</span> Bonjour, je suis
 </div> <h1 class="hero-presentation" data-astro-cid-bbe6dxrz>
 Jean-José <span class="name" data-astro-cid-bbe6dxrz>Muller</span> </h1> <h2 class="hero-title" data-astro-cid-bbe6dxrz>
 Étudiant dans les métiers du multimédia et de l'internet
@@ -105,7 +106,7 @@ Actuellement en 2ème année, je suis passionné par le design et
                 professionnels.
 </p> <div class="hero-tags" data-astro-cid-bbe6dxrz> <span class="hero-tag" data-astro-cid-bbe6dxrz>HTML/CSS</span> <span class="hero-tag" data-astro-cid-bbe6dxrz>JavaScript</span> <span class="hero-tag" data-astro-cid-bbe6dxrz>Design UI/UX</span> <span class="hero-tag" data-astro-cid-bbe6dxrz>Multimédia</span> </div><div class="CTAs" data-astro-cid-bbe6dxrz> <a href="#projects" class="CTA" data-astro-cid-bbe6dxrz> <span data-astro-cid-bbe6dxrz>Voir mes projets</span> <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-bbe6dxrz> <path d="M5 12h14" data-astro-cid-bbe6dxrz></path> <path d="M12 5l7 7-7 7" data-astro-cid-bbe6dxrz></path> </svg> </a> <a href="https://www.linkedin.com/in/jean-jos%C3%A9-muller-892b91276/" target="_blank" rel="noopener noreferrer" class="CTA2" data-astro-cid-bbe6dxrz> <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-bbe6dxrz> <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" data-astro-cid-bbe6dxrz></path> </svg>
 LinkedIn
-</a> </div> </article> </div> <div class="hero-image" data-aos="fade-up" data-aos-delay="200" data-astro-cid-bbe6dxrz> <div class="image-wrapper" data-astro-cid-bbe6dxrz> <img class="hero__img" src="/Portfolio/Muller_Photo.jpeg" alt="Portrait de Muller Jean-José" loading="eager" style="cursor: pointer;" onclick="openOverlay('/Portfolio/Muller_Photo.jpeg')" data-astro-cid-bbe6dxrz> <div class="hero-blob" data-astro-cid-bbe6dxrz></div> <div class="image-shine" data-astro-cid-bbe6dxrz></div> </div> <div class="hero-image-dots" data-astro-cid-bbe6dxrz></div> </div> </section> <div id="overlay" class="overlay" onclick="closeOverlay(event)" data-astro-cid-bbe6dxrz> <span class="close" onclick="closeOverlay(event)" data-astro-cid-bbe6dxrz>&times;</span> <img id="overlayImage" src="" alt="" data-astro-cid-bbe6dxrz> </div> <script type="module" src="/Portfolio/Portfolio/Portfolio/js/Hero.astro_astro_type_script_index_0_lang.l0sNRNKZ.js"></script>  </div> <section class="education-section" data-astro-cid-2gvrk3wr> <div class="education-container" data-astro-cid-2gvrk3wr> <div class="education-header" data-aos="fade-up" data-astro-cid-2gvrk3wr> <h2 class="education-title" data-astro-cid-2gvrk3wr>Mon parcours</h2> <div class="education-divider" data-astro-cid-2gvrk3wr></div> <p class="education-subtitle" data-astro-cid-2gvrk3wr>
+</a> </div> </article> </div> <div class="hero-image" data-aos="fade-up" data-aos-delay="200" data-astro-cid-bbe6dxrz> <div class="image-wrapper" data-astro-cid-bbe6dxrz> <img class="hero__img" src="/Portfolio/Muller_Photo.jpeg" alt="Portrait de Muller Jean-José" loading="eager" style="cursor: pointer;" onclick="openOverlay('/Portfolio/Muller_Photo.jpeg')" data-astro-cid-bbe6dxrz> <div class="hero-blob" data-astro-cid-bbe6dxrz></div> <div class="image-shine" data-astro-cid-bbe6dxrz></div> </div> <div class="hero-image-dots" data-astro-cid-bbe6dxrz></div> </div> </section> <div id="overlay" class="overlay" onclick="closeOverlay(event)" data-astro-cid-bbe6dxrz> <span class="close" onclick="closeOverlay(event)" data-astro-cid-bbe6dxrz>&times;</span> <img id="overlayImage" src="" alt="" data-astro-cid-bbe6dxrz> </div>   </div> <section class="education-section" data-astro-cid-2gvrk3wr> <div class="education-container" data-astro-cid-2gvrk3wr> <div class="education-header" data-aos="fade-up" data-astro-cid-2gvrk3wr> <h2 class="education-title" data-astro-cid-2gvrk3wr>Mon parcours</h2> <div class="education-divider" data-astro-cid-2gvrk3wr></div> <p class="education-subtitle" data-astro-cid-2gvrk3wr>
 Découvrez mon parcours académique, mes compétences en
                 développement et mes objectifs professionnels
 </p> </div> <div class="education-timeline" data-astro-cid-2gvrk3wr> <div class="timeline-item" data-aos="fade-up" data-aos-delay="100" data-astro-cid-2gvrk3wr> <div class="timeline-dot" data-astro-cid-2gvrk3wr></div> <div class="timeline-content" data-astro-cid-2gvrk3wr> <div class="timeline-header" data-astro-cid-2gvrk3wr> <div class="timeline-icon" data-astro-cid-2gvrk3wr> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-2gvrk3wr> <path d="M22 10v6M2 10l10-5 10 5-10 5z" data-astro-cid-2gvrk3wr></path> <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5" data-astro-cid-2gvrk3wr></path> </svg> </div> <h3 class="timeline-title" data-astro-cid-2gvrk3wr>Formation actuelle</h3> <span class="timeline-period" data-astro-cid-2gvrk3wr>2023 - Présent</span> </div> <div class="timeline-body" data-astro-cid-2gvrk3wr> <p data-astro-cid-2gvrk3wr>
@@ -136,7 +137,7 @@ Je souhaite devenir Webdesigner spécialisé en UX/UI
                             créative ou en freelance, où je pourrai contribuer à
                             des projets variés tout en continuant à développer
                             mes compétences en design et en prototypage.
-</p> <div class="skills-tags" data-astro-cid-2gvrk3wr> <span class="skill-tag" data-astro-cid-2gvrk3wr>UX/UI</span> <span class="skill-tag" data-astro-cid-2gvrk3wr>Webdesigner</span> </div> </div> </div> </div> </div> <div class="skills-section" data-aos="fade-up" data-astro-cid-2gvrk3wr> <h3 class="skills-section-title" data-astro-cid-2gvrk3wr>Mes compétences techniques</h3> <div class="skill-bars" data-astro-cid-2gvrk3wr> <div class="skill-bar" data-astro-cid-2gvrk3wr> <div class="skill-info" data-astro-cid-2gvrk3wr> <span data-astro-cid-2gvrk3wr>HTML & CSS</span> <span data-astro-cid-2gvrk3wr>85%</span> </div> <div class="skill-bar-bg" data-astro-cid-2gvrk3wr> <div class="skill-bar-fill" style="width: 85%;" data-width="85%" data-astro-cid-2gvrk3wr></div> </div> </div> <div class="skill-bar" data-astro-cid-2gvrk3wr> <div class="skill-info" data-astro-cid-2gvrk3wr> <span data-astro-cid-2gvrk3wr>JavaScript</span> <span data-astro-cid-2gvrk3wr>70%</span> </div> <div class="skill-bar-bg" data-astro-cid-2gvrk3wr> <div class="skill-bar-fill" style="width: 70%;" data-width="70%" data-astro-cid-2gvrk3wr></div> </div> </div> <div class="skill-bar" data-astro-cid-2gvrk3wr> <div class="skill-info" data-astro-cid-2gvrk3wr> <span data-astro-cid-2gvrk3wr>Wordpress</span> <span data-astro-cid-2gvrk3wr>80%</span> </div> <div class="skill-bar-bg" data-astro-cid-2gvrk3wr> <div class="skill-bar-fill" style="width: 80%;" data-width="80%" data-astro-cid-2gvrk3wr></div> </div> </div> <div class="skill-bar" data-astro-cid-2gvrk3wr> <div class="skill-info" data-astro-cid-2gvrk3wr> <span data-astro-cid-2gvrk3wr>UI/UX Design</span> <span data-astro-cid-2gvrk3wr>75%</span> </div> <div class="skill-bar-bg" data-astro-cid-2gvrk3wr> <div class="skill-bar-fill" style="width: 75%;" data-width="75%" data-astro-cid-2gvrk3wr></div> </div> </div> </div> </div> </div> </section> <script type="module" src="/Portfolio/Portfolio/Portfolio/js/Education.astro_astro_type_script_index_0_lang.Btxk6n8s.js"></script>  <div class="skills" data-aos="fade-up" data-astro-cid-j7pv25f6> <div class="skills-shapes" data-astro-cid-j7pv25f6> <div class="skill-shape shape1" data-astro-cid-j7pv25f6></div> <div class="skill-shape shape2" data-astro-cid-j7pv25f6></div> <div class="skill-dots" data-astro-cid-j7pv25f6></div> </div> <div class="skills-container" data-astro-cid-j7pv25f6> <div class="skills-header" data-astro-cid-j7pv25f6> <h2 class="skills-title" data-astro-cid-j7pv25f6>Mes compétences</h2> <div class="skills-divider" data-astro-cid-j7pv25f6></div> <p class="skills-subtitle" data-astro-cid-j7pv25f6>
+</p> <div class="skills-tags" data-astro-cid-2gvrk3wr> <span class="skill-tag" data-astro-cid-2gvrk3wr>UX/UI</span> <span class="skill-tag" data-astro-cid-2gvrk3wr>Webdesigner</span> </div> </div> </div> </div> </div> <div class="skills-section" data-aos="fade-up" data-astro-cid-2gvrk3wr> <h3 class="skills-section-title" data-astro-cid-2gvrk3wr>Mes compétences techniques</h3> <div class="skill-bars" data-astro-cid-2gvrk3wr> <div class="skill-bar" data-astro-cid-2gvrk3wr> <div class="skill-info" data-astro-cid-2gvrk3wr> <span data-astro-cid-2gvrk3wr>HTML & CSS</span> <span data-astro-cid-2gvrk3wr>85%</span> </div> <div class="skill-bar-bg" data-astro-cid-2gvrk3wr> <div class="skill-bar-fill" style="width: 85%;" data-width="85%" data-astro-cid-2gvrk3wr></div> </div> </div> <div class="skill-bar" data-astro-cid-2gvrk3wr> <div class="skill-info" data-astro-cid-2gvrk3wr> <span data-astro-cid-2gvrk3wr>JavaScript</span> <span data-astro-cid-2gvrk3wr>70%</span> </div> <div class="skill-bar-bg" data-astro-cid-2gvrk3wr> <div class="skill-bar-fill" style="width: 70%;" data-width="70%" data-astro-cid-2gvrk3wr></div> </div> </div> <div class="skill-bar" data-astro-cid-2gvrk3wr> <div class="skill-info" data-astro-cid-2gvrk3wr> <span data-astro-cid-2gvrk3wr>Wordpress</span> <span data-astro-cid-2gvrk3wr>80%</span> </div> <div class="skill-bar-bg" data-astro-cid-2gvrk3wr> <div class="skill-bar-fill" style="width: 80%;" data-width="80%" data-astro-cid-2gvrk3wr></div> </div> </div> <div class="skill-bar" data-astro-cid-2gvrk3wr> <div class="skill-info" data-astro-cid-2gvrk3wr> <span data-astro-cid-2gvrk3wr>UI/UX Design</span> <span data-astro-cid-2gvrk3wr>75%</span> </div> <div class="skill-bar-bg" data-astro-cid-2gvrk3wr> <div class="skill-bar-fill" style="width: 75%;" data-width="75%" data-astro-cid-2gvrk3wr></div> </div> </div> </div> </div> </div> </section> <script type="module">document.addEventListener("DOMContentLoaded",()=>{const i=document.querySelectorAll(".skill-bar-fill"),n=()=>{i.forEach(e=>{const t=e.getAttribute("data-width");e.style.width="0",setTimeout(()=>{e.style.width=t},200)})},s=new IntersectionObserver(e=>{e.forEach(t=>{t.isIntersecting&&(n(),s.unobserve(t.target))})},{threshold:.5}),o=document.querySelector(".skills-section");o&&s.observe(o)});</script>  <div class="skills" data-aos="fade-up" data-astro-cid-j7pv25f6> <div class="skills-shapes" data-astro-cid-j7pv25f6> <div class="skill-shape shape1" data-astro-cid-j7pv25f6></div> <div class="skill-shape shape2" data-astro-cid-j7pv25f6></div> <div class="skill-dots" data-astro-cid-j7pv25f6></div> </div> <div class="skills-container" data-astro-cid-j7pv25f6> <div class="skills-header" data-astro-cid-j7pv25f6> <h2 class="skills-title" data-astro-cid-j7pv25f6>Mes compétences</h2> <div class="skills-divider" data-astro-cid-j7pv25f6></div> <p class="skills-subtitle" data-astro-cid-j7pv25f6>
 Découvrez mes domaines d'expertise et compétences techniques
 </p> </div> <div class="skills-grid" data-astro-cid-j7pv25f6> <div class="skill-card" data-aos="fade-up" data-aos-delay="100" data-astro-cid-j7pv25f6> <div class="skill-icon" data-astro-cid-j7pv25f6> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-j7pv25f6><path d="M2 16.1A5 5 0 0 1 5.9 20M2 12.05A9 9 0 0 1 9.95 20M2 8V6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-6" data-astro-cid-j7pv25f6></path><line x1="2" y1="20" x2="2" y2="20" data-astro-cid-j7pv25f6></line></svg> </div> <h3 data-astro-cid-j7pv25f6>Développement Web</h3> <p data-astro-cid-j7pv25f6>
 Création de sites web modernes et responsive avec HTML,
@@ -156,7 +157,7 @@ Voir le projet
 Voir le projet
 </a>  </div> <div class="project-image" data-astro-cid-2wkm2a2e> <img src="/Portfolio/littlehorses.svg" alt="Little Horses" class="project-img" loading="lazy" width="800" height="500" style="cursor: pointer;" onclick="openOverlay('/Portfolio/littlehorses.svg')" data-astro-cid-2wkm2a2e> </div> </article><article class="project-card card1" data-aos="fade-up" data-categories="UX/UI Design Motion design Méthode agile" data-astro-cid-2wkm2a2e> <div class="project-content" data-astro-cid-2wkm2a2e> <h3 class="project-title" data-astro-cid-2wkm2a2e>Digital Cleanup Day</h3> <p class="project-description" data-astro-cid-2wkm2a2e>Conception et développement d&#39;un site web éco-responsable pour l&#39;événement Digital Cleanup Day visant à sensibiliser le public à la pollution numérique. J&#39;ai également créé divers supports de communication et réalisé une vidéo promotionnelle en motion design.</p> <div class="project-meta" data-astro-cid-2wkm2a2e> <span class="project-date" data-astro-cid-2wkm2a2e> <time datetime="2023-12-21T00:00:00.000Z"> 21 décembre 2023 </time> </span> <div class="project-tags" data-astro-cid-2wkm2a2e> <span class="project-tag" data-astro-cid-2wkm2a2e>UX/UI Design</span><span class="project-tag" data-astro-cid-2wkm2a2e>Motion design</span><span class="project-tag" data-astro-cid-2wkm2a2e>Méthode agile</span> </div>  </div> <a href="/Portfolio/works/digitalcleanupday/" class="project-link" data-astro-cid-2wkm2a2e>
 Voir le projet
-</a>  </div> <div class="project-image" data-astro-cid-2wkm2a2e> <img src="/Portfolio/Digitalcleanupday.svg" alt="Digital Cleanup Day" class="project-img" loading="lazy" width="800" height="500" style="cursor: pointer;" onclick="openOverlay('/Portfolio/Digitalcleanupday.svg')" data-astro-cid-2wkm2a2e> </div> </article> </div> <div id="overlay" class="overlay" onclick="closeOverlay(event)" data-astro-cid-2wkm2a2e> <span class="close" onclick="closeOverlay(event)" data-astro-cid-2wkm2a2e>&times;</span> <img id="overlayImage" src="" alt="" data-astro-cid-2wkm2a2e> </div> <script type="module" src="/Portfolio/Portfolio/Portfolio/js/ProjectGrid.astro_astro_type_script_index_0_lang.biA-_Wcm.js"></script>   </div> <div class="projects-button-container" data-aos="fade-up" data-astro-cid-amng4zvp> <a href="/Portfolio/works" class="projects-button" data-astro-cid-amng4zvp> <span data-astro-cid-amng4zvp>Voir tous mes projets</span> <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-amng4zvp> <path d="M5 12h14" data-astro-cid-amng4zvp></path> <path d="M12 5l7 7-7 7" data-astro-cid-amng4zvp></path> </svg> </a> </div> </div> <!-- Éléments décoratifs --> <div class="decorative-element circle1" data-astro-cid-amng4zvp></div> <div class="decorative-element circle2" data-astro-cid-amng4zvp></div> <div class="decorative-element square1" data-astro-cid-amng4zvp></div> </section> <script type="module" src="/Portfolio/Portfolio/Portfolio/js/Projects.astro_astro_type_script_index_0_lang.SZWA_YCQ.js"></script>   <script type="module" src="/Portfolio/Portfolio/Portfolio/js/Projects.astro_astro_type_script_index_1_lang.BAibSM0p.js"></script> <section class="contact-section" id="contact" data-astro-cid-xmivup5a> <!-- Éléments décoratifs --> <div class="contact-shape shape1" data-astro-cid-xmivup5a></div> <div class="contact-shape shape2" data-astro-cid-xmivup5a></div> <div class="contact-dots" data-astro-cid-xmivup5a></div> <div class="contact-container" data-astro-cid-xmivup5a> <div class="contact-header" data-aos="fade-up" data-astro-cid-xmivup5a> <h2 class="contact-title" data-astro-cid-xmivup5a>Contactez-moi</h2> <div class="contact-divider" data-astro-cid-xmivup5a></div> <p class="contact-text" data-astro-cid-xmivup5a>
+</a>  </div> <div class="project-image" data-astro-cid-2wkm2a2e> <img src="/Portfolio/Digitalcleanupday.svg" alt="Digital Cleanup Day" class="project-img" loading="lazy" width="800" height="500" style="cursor: pointer;" onclick="openOverlay('/Portfolio/Digitalcleanupday.svg')" data-astro-cid-2wkm2a2e> </div> </article> </div> <div id="overlay" class="overlay" onclick="closeOverlay(event)" data-astro-cid-2wkm2a2e> <span class="close" onclick="closeOverlay(event)" data-astro-cid-2wkm2a2e>&times;</span> <img id="overlayImage" src="" alt="" data-astro-cid-2wkm2a2e> </div> <script type="module">document.addEventListener("DOMContentLoaded",()=>{const c=document.querySelector(".dropdown-button"),d=document.querySelector(".dropdown-menu"),r=document.querySelector(".selected-category"),o=document.querySelectorAll(".filter-tag"),l=document.querySelectorAll(".project-card");o.length&&l.length&&o.forEach(t=>{t.addEventListener("click",()=>{d&&c&&r&&(d.classList.remove("show"),c.classList.remove("active"),r.textContent=t.textContent),o.forEach(s=>s.classList.remove("active")),t.classList.add("active");const n=t.getAttribute("data-category")||"all";l.forEach(s=>{const e=s;if(n==="all")e.style.display="flex",setTimeout(()=>{e.classList.remove("hidden-project")},10);else{const a=e.getAttribute("data-categories");a&&a.includes(n)?(e.style.display="flex",setTimeout(()=>{e.classList.remove("hidden-project")},10)):(e.classList.add("hidden-project"),setTimeout(()=>{e.style.display="none"},300))}})})})});</script>   </div> <div class="projects-button-container" data-aos="fade-up" data-astro-cid-amng4zvp> <a href="/Portfolio/works" class="projects-button" data-astro-cid-amng4zvp> <span data-astro-cid-amng4zvp>Voir tous mes projets</span> <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-amng4zvp> <path d="M5 12h14" data-astro-cid-amng4zvp></path> <path d="M12 5l7 7-7 7" data-astro-cid-amng4zvp></path> </svg> </a> </div> </div> <!-- Éléments décoratifs --> <div class="decorative-element circle1" data-astro-cid-amng4zvp></div> <div class="decorative-element circle2" data-astro-cid-amng4zvp></div> <div class="decorative-element square1" data-astro-cid-amng4zvp></div> </section> <script type="module">document.addEventListener("DOMContentLoaded",function(){const s=document.querySelectorAll(".filter-tag");s.forEach(i=>{i.addEventListener("click",function(a){a.preventDefault();const e=this.getAttribute("data-tag"),o=window.location.pathname;let t;e==="Tous"?t=o:t=`${o}?tag=${e}`,window.history.pushState({},"",t),s.forEach(c=>c.classList.remove("active")),this.classList.add("active"),n(e)})}),window.addEventListener("resize",function(){const i=document.querySelector(".filter-tag.active");i&&n(i.getAttribute("data-tag"))});function n(i){document.querySelectorAll(".project-card").forEach(e=>{const o=e.getAttribute("data-categories");if(i==="Tous"||o&&o.includes(i)){const t=e;t.style.display="flex",e.classList.contains("card2")?t.style.flexDirection="row-reverse":t.style.flexDirection="row",window.innerWidth<=768&&(t.style.flexDirection="column"),t.style.opacity="0",setTimeout(()=>{t.style.opacity="1",t.style.transition="opacity 0.3s ease"},10)}else e.style.display="none"})}});</script>   <script type="module">document.addEventListener("DOMContentLoaded",()=>{const e=document.getElementById("categoryDropdown"),s=document.getElementById("categoryOptions"),r=document.querySelector(".selected-category"),d=document.querySelectorAll(".filter-option"),i=document.querySelectorAll(".project-card");if(!e||!s||!r){console.error("Éléments du menu déroulant non trouvés");return}e.addEventListener("click",()=>{const t=e.getAttribute("aria-expanded")==="true";e.setAttribute("aria-expanded",(!t).toString()),t?(s.classList.remove("show"),e.classList.remove("active")):(s.classList.add("show"),e.classList.add("active"))}),document.addEventListener("click",t=>{const o=t.target;!e.contains(o)&&!s.contains(o)&&(s.classList.remove("show"),e.classList.remove("active"),e.setAttribute("aria-expanded","false"))}),d.forEach(t=>{t.addEventListener("click",()=>{const o=t.getAttribute("data-filter")||"all";r.textContent=t.textContent,d.forEach(a=>a.classList.remove("active")),t.classList.add("active"),s.classList.remove("show"),e.classList.remove("active"),e.setAttribute("aria-expanded","false"),i.forEach(a=>{const c=a;if(o==="all")c.style.display="flex",setTimeout(()=>{a.classList.remove("hidden-project")},50);else{const n=c.getAttribute("data-categories")||c.getAttribute("data-category");n&&n.includes(o)?(c.style.display="flex",setTimeout(()=>{a.classList.remove("hidden-project")},50)):(a.classList.add("hidden-project"),setTimeout(()=>{c.style.display="none"},300))}})})})});</script> <section class="contact-section" id="contact" data-astro-cid-xmivup5a> <!-- Éléments décoratifs --> <div class="contact-shape shape1" data-astro-cid-xmivup5a></div> <div class="contact-shape shape2" data-astro-cid-xmivup5a></div> <div class="contact-dots" data-astro-cid-xmivup5a></div> <div class="contact-container" data-astro-cid-xmivup5a> <div class="contact-header" data-aos="fade-up" data-astro-cid-xmivup5a> <h2 class="contact-title" data-astro-cid-xmivup5a>Contactez-moi</h2> <div class="contact-divider" data-astro-cid-xmivup5a></div> <p class="contact-text" data-astro-cid-xmivup5a>
 Vous avez une opportunité de stage ou souhaitez discuter de mes
                 projets ? N'hésitez pas à me contacter via l'un des moyens
                 ci-dessous.
