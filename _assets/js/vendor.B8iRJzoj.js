@@ -1944,7 +1944,7 @@ class ImmutableDataStore {
    */
   static async fromModule() {
     try {
-      const data = await import('./_astro_data-layer-content.B3TsAZXw.js');
+      const data = await import('./_astro_data-layer-content.CWE2JXLB.js');
       if (data.default instanceof Map) {
         return ImmutableDataStore.fromMap(data.default);
       }

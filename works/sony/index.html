@@ -1,99 +1,132 @@
 <!DOCTYPE html><html lang="fr"> <head><!-- Global Metadata --><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" type="image/jpeg" href="/Portfolio/Muller_Photo.jpeg"><link rel="apple-touch-icon" href="/Portfolio/Muller_Photo.jpeg"><!-- Asset path handling --><script>
-    window.portfolioBase = "/Portfolio";
+    (() => {
+        const portfolioBase = "/Portfolio";
 
-    function fixAssetPath(url) {
-        if (
-            !url ||
-            url.startsWith("http") ||
-            url.startsWith("data:") ||
-            url.startsWith("blob:") ||
-            url.startsWith("mailto:") ||
-            url.startsWith("#")
-        ) {
-            return url;
+        function isSpecialURL(url) {
+            return (
+                !url ||
+                url.startsWith("http") ||
+                url.startsWith("data:") ||
+                url.startsWith("blob:") ||
+                url.startsWith("mailto:") ||
+                url.startsWith("#")
+            );
         }
 
-        // Clean up the URL and normalize slashes
-        url = url.replace(/\/+/g, "/");
+        function fixAssetPath(url) {
+            if (isSpecialURL(url)) return url;
 
-        // Remove duplicate Portfolio prefixes
-        while (url.includes("/Portfolio/Portfolio/")) {
-            url = url.replace("/Portfolio/Portfolio/", "/Portfolio/");
-        }
+            // Clean up path
+            let cleanPath = url.replace(/\/+/g, "/").replace(/\/+$/, "");
 
-        // Remove trailing slashes
-        url = url.replace(/\/+$/, "");
-
-        // Ensure Portfolio prefix
-        if (!url.startsWith("/Portfolio/")) {
-            url = url.startsWith("/")
-                ? `/Portfolio${url}`
-                : `/Portfolio/${url}`;
-        }
-
-        // Final cleanup of any double slashes
-        return url.replace(/\/+/g, "/");
-    }
-
-    function fixAllAssetPaths() {
-        // Fix stylesheet paths
-        document.querySelectorAll('link[rel="stylesheet"]').forEach((link) => {
-            const href = link.getAttribute("href");
-            if (href) link.setAttribute("href", fixAssetPath(href));
-        });
-
-        // Fix image paths
-        document.querySelectorAll("img[src]").forEach((img) => {
-            const src = img.getAttribute("src");
-            if (src) img.setAttribute("src", fixAssetPath(src));
-        });
-
-        // Fix video sources
-        document.querySelectorAll("source[src]").forEach((source) => {
-            const src = source.getAttribute("src");
-            if (src) source.setAttribute("src", fixAssetPath(src));
-        });
-
-        // Fix anchor hrefs
-        document.querySelectorAll("a[href]").forEach((a) => {
-            const href = a.getAttribute("href");
-            if (
-                href &&
-                !href.startsWith("http") &&
-                !href.startsWith("mailto:") &&
-                !href.startsWith("#")
-            ) {
-                a.setAttribute("href", fixAssetPath(href));
-            }
-        });
-
-        // Fix background images in CSS
-        document.querySelectorAll('[style*="url("]').forEach((el) => {
-            const style = el.getAttribute("style");
-            if (style) {
-                el.setAttribute(
-                    "style",
-                    style.replace(
-                        /url\(['"]?([^'")\s]+)['"]?\)/g,
-                        (match, url) => `url('${fixAssetPath(url)}')`,
-                    ),
+            // Remove duplicate Portfolio prefixes
+            while (cleanPath.includes(`${portfolioBase}/${portfolioBase}`)) {
+                cleanPath = cleanPath.replace(
+                    `${portfolioBase}/${portfolioBase}`,
+                    portfolioBase,
                 );
             }
+
+            // Ensure Portfolio prefix
+            if (!cleanPath.startsWith(portfolioBase)) {
+                cleanPath = cleanPath.startsWith("/")
+                    ? `${portfolioBase}${cleanPath}`
+                    : `${portfolioBase}/${cleanPath}`;
+            }
+
+            return cleanPath;
+        }
+
+        function updateElementAttribute(element, attributeName) {
+            const value = element.getAttribute(attributeName);
+            if (value) element.setAttribute(attributeName, fixAssetPath(value));
+        }
+
+        function fixAllAssetPaths() {
+            // Fix common asset paths
+            const assetSelectors = {
+                'link[rel="stylesheet"]': "href",
+                "img[src]": "src",
+                "source[src]": "src",
+                "script[src]": "src",
+                "a[href]": "href",
+                "video[src]": "src",
+            };
+
+            for (const [selector, attr] of Object.entries(assetSelectors)) {
+                document.querySelectorAll(selector).forEach((el) => {
+                    updateElementAttribute(el, attr);
+                });
+            }
+
+            // Fix inline styles with urls
+            document.querySelectorAll('[style*="url("]').forEach((el) => {
+                const style = el.getAttribute("style");
+                if (style) {
+                    el.setAttribute(
+                        "style",
+                        style.replace(
+                            /url\(['"]?([^'")\s]+)['"]?\)/g,
+                            (match, url) => `url('${fixAssetPath(url)}')`,
+                        ),
+                    );
+                }
+            });
+
+            // Fix dynamically loaded images
+            document.querySelectorAll("img").forEach((img) => {
+                if (img.dataset.src) {
+                    img.dataset.src = fixAssetPath(img.dataset.src);
+                }
+                if (img.srcset) {
+                    img.srcset = img.srcset
+                        .split(",")
+                        .map((src) => {
+                            const [url, size] = src.trim().split(/\s+/);
+                            return `${fixAssetPath(url)} ${size || ""}`.trim();
+                        })
+                        .join(", ");
+                }
+            });
+        }
+
+        // Fix paths on load and DOM changes
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", fixAllAssetPaths);
+        } else {
+            fixAllAssetPaths();
+        }
+
+        // Watch for dynamic content changes
+        const observer = new MutationObserver((mutations) => {
+            let needsUpdate = false;
+
+            for (const mutation of mutations) {
+                if (
+                    mutation.type === "childList" ||
+                    (mutation.type === "attributes" &&
+                        ["src", "href", "style"].includes(
+                            mutation.attributeName,
+                        ))
+                ) {
+                    needsUpdate = true;
+                    break;
+                }
+            }
+
+            if (needsUpdate) fixAllAssetPaths();
         });
-    }
 
-    // Fix paths on initial load
-    document.addEventListener("DOMContentLoaded", fixAllAssetPaths);
-
-    // Fix paths after any dynamic content updates
-    const observer = new MutationObserver(fixAllAssetPaths);
-    observer.observe(document.documentElement, {
-        childList: true,
-        subtree: true,
-    });
-</script><meta name="generator" content="Astro v5.7.13"><!-- Primary Meta Tags --><title>Sony Electronics</title><meta name="title" content="Sony Electronics"><meta name="description" content="Pour ce projet nous avons du créer une boutique de E-commerce avec la possibilité de récupérer les commandes en click &#38; collect. Nous avons du le réalisé en bînome à l'aide de Wordpress mais aussi de Woocomerce principalement."><!-- Open Graph / Facebook --><meta property="og:type" content="website"><meta property="og:url" content="https://dixydres.github.io/Portfolio/works/sony/"><meta property="og:title" content="Sony Electronics"><meta property="og:description" content="Pour ce projet nous avons du créer une boutique de E-commerce avec la possibilité de récupérer les commandes en click &#38; collect. Nous avons du le réalisé en bînome à l'aide de Wordpress mais aussi de Woocomerce principalement."><meta property="og:image" content="https://dixydres.github.io/Portfolio/Muller_Photo.jpeg"><!-- Twitter --><meta property="twitter:card" content="summary_large_image"><meta property="twitter:url" content="https://dixydres.github.io/Portfolio/works/sony/"><meta property="twitter:title" content="Sony Electronics"><meta property="twitter:description" content="Pour ce projet nous avons du créer une boutique de E-commerce avec la possibilité de récupérer les commandes en click &#38; collect. Nous avons du le réalisé en bînome à l'aide de Wordpress mais aussi de Woocomerce principalement."><meta property="twitter:image" content="https://dixydres.github.io/Portfolio/Muller_Photo.jpeg"><!-- Fonts and Styles --><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css"><script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r150/three.min.js"></script><script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script><link rel="stylesheet" href="/Portfolio/assets/css/style.CrmcWLEY.css"></head> <body> <div class="container"> <header class="nav-bar" data-astro-cid-dmqpwcec> <div class="nav-container" data-astro-cid-dmqpwcec> <div class="nav-logo" data-astro-cid-dmqpwcec> <a href="/Portfolio/" class="nav-name" style="text-decoration:none;" data-astro-cid-dmqpwcec>
+        observer.observe(document.documentElement, {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            attributeFilter: ["src", "href", "style"],
+        });
+    })();
+</script><meta name="generator" content="Astro v5.7.13"><!-- Primary Meta Tags --><title>Sony Electronics</title><meta name="title" content="Sony Electronics"><meta name="description" content="Pour ce projet nous avons du créer une boutique de E-commerce avec la possibilité de récupérer les commandes en click &#38; collect. Nous avons du le réalisé en bînome à l'aide de Wordpress mais aussi de Woocomerce principalement."><!-- Open Graph / Facebook --><meta property="og:type" content="website"><meta property="og:url" content="https://dixydres.github.io/Portfolio/works/sony/"><meta property="og:title" content="Sony Electronics"><meta property="og:description" content="Pour ce projet nous avons du créer une boutique de E-commerce avec la possibilité de récupérer les commandes en click &#38; collect. Nous avons du le réalisé en bînome à l'aide de Wordpress mais aussi de Woocomerce principalement."><meta property="og:image" content="https://dixydres.github.io/Portfolio/Muller_Photo.jpeg"><!-- Twitter --><meta property="twitter:card" content="summary_large_image"><meta property="twitter:url" content="https://dixydres.github.io/Portfolio/works/sony/"><meta property="twitter:title" content="Sony Electronics"><meta property="twitter:description" content="Pour ce projet nous avons du créer une boutique de E-commerce avec la possibilité de récupérer les commandes en click &#38; collect. Nous avons du le réalisé en bînome à l'aide de Wordpress mais aussi de Woocomerce principalement."><meta property="twitter:image" content="https://dixydres.github.io/Portfolio/Muller_Photo.jpeg"><!-- Fonts and Styles --><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css"><script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r150/three.min.js"></script><script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script><link rel="stylesheet" href="/Portfolio/_assets/styles/style.CrmcWLEY.css"></head> <body> <div class="container"> <header class="nav-bar" data-astro-cid-dmqpwcec> <div class="nav-container" data-astro-cid-dmqpwcec> <div class="nav-logo" data-astro-cid-dmqpwcec> <a href="/Portfolio/" class="nav-name" style="text-decoration:none;" data-astro-cid-dmqpwcec>
 Muller Jean-José
-</a> </div> <button class="mobile-menu-toggle" aria-label="Menu" data-astro-cid-dmqpwcec> <span class="bar" data-astro-cid-dmqpwcec></span> <span class="bar" data-astro-cid-dmqpwcec></span> <span class="bar" data-astro-cid-dmqpwcec></span> </button> <nav class="nav-menu" data-astro-cid-dmqpwcec> <ul class="nav-link" data-astro-cid-dmqpwcec> <li data-astro-cid-dmqpwcec><a href="/Portfolio/" data-astro-cid-dmqpwcec>Accueil</a></li> <li data-astro-cid-dmqpwcec><a href="/Portfolio/about" data-astro-cid-dmqpwcec>À propos</a></li> <li data-astro-cid-dmqpwcec><a href="/Portfolio/works" data-astro-cid-dmqpwcec>Projets</a></li> <li data-astro-cid-dmqpwcec> <a href="/Portfolio/#contact" class="contact-btn" data-astro-cid-dmqpwcec>Contact</a> </li> </ul> </nav> </div> </header> <script type="module" src="/Portfolio/assets/js/Nav.astro_astro_type_script_index_0_lang.BB-vzxjg.js"></script>  <main>  <a href="/Portfolio/works/" class="back-to-top" data-astro-cid-eo3wme6m> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-eo3wme6m><line x1="19" y1="12" x2="5" y2="12" data-astro-cid-eo3wme6m></line><polyline points="12 19 5 12 12 5" data-astro-cid-eo3wme6m></polyline></svg> <span data-astro-cid-eo3wme6m>Retour</span> </a> <article class="post" data-astro-cid-eo3wme6m> <div class="hero" data-astro-cid-eo3wme6m> <img src="/Portfolio/public/Portfolio/sony.svg" alt="Sony Electronics" class="hero-image" data-astro-cid-eo3wme6m> <div class="hero-overlay" data-astro-cid-eo3wme6m></div> <div class="hero-content" data-astro-cid-eo3wme6m> <h1 class="title" data-astro-cid-eo3wme6m>Sony Electronics</h1> <p class="description" data-astro-cid-eo3wme6m>Pour ce projet nous avons du créer une boutique de E-commerce avec la possibilité de récupérer les commandes en click &amp; collect. Nous avons du le réalisé en bînome à l&#39;aide de Wordpress mais aussi de Woocomerce principalement.</p> <div class="post-meta" data-astro-cid-eo3wme6m> <div class="date-container" data-astro-cid-eo3wme6m> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-eo3wme6m><rect x="3" y="4" width="18" height="18" rx="2" ry="2" data-astro-cid-eo3wme6m></rect><line x1="16" y1="2" x2="16" y2="6" data-astro-cid-eo3wme6m></line><line x1="8" y1="2" x2="8" y2="6" data-astro-cid-eo3wme6m></line><line x1="3" y1="10" x2="21" y2="10" data-astro-cid-eo3wme6m></line></svg> <time datetime="2023-11-15T00:00:00.000Z"> 15 novembre 2023 </time> </div>  <a href="https://sae10.mmidev.fr" target="_blank" rel="noopener noreferrer" class="project-link" data-astro-cid-eo3wme6m> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-eo3wme6m>  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1-2-2h6" data-astro-cid-eo3wme6m></path> <polyline points="15 3 21 3 21 9" data-astro-cid-eo3wme6m></polyline> <line x1="10" y1="14" x2="21" y2="3" data-astro-cid-eo3wme6m></line>  </svg>
+</a> </div> <button class="mobile-menu-toggle" aria-label="Menu" data-astro-cid-dmqpwcec> <span class="bar" data-astro-cid-dmqpwcec></span> <span class="bar" data-astro-cid-dmqpwcec></span> <span class="bar" data-astro-cid-dmqpwcec></span> </button> <nav class="nav-menu" data-astro-cid-dmqpwcec> <ul class="nav-link" data-astro-cid-dmqpwcec> <li data-astro-cid-dmqpwcec><a href="/Portfolio/" data-astro-cid-dmqpwcec>Accueil</a></li> <li data-astro-cid-dmqpwcec><a href="/Portfolio/about" data-astro-cid-dmqpwcec>À propos</a></li> <li data-astro-cid-dmqpwcec><a href="/Portfolio/works" data-astro-cid-dmqpwcec>Projets</a></li> <li data-astro-cid-dmqpwcec> <a href="/Portfolio/#contact" class="contact-btn" data-astro-cid-dmqpwcec>Contact</a> </li> </ul> </nav> </div> </header> <script type="module" src="/Portfolio/Portfolio//Portfolio/_assets/js/Nav.astro_astro_type_script_index_0_lang.BB-vzxjg.js"></script>  <main>  <a href="/Portfolio/works/" class="back-to-top" data-astro-cid-eo3wme6m> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-eo3wme6m><line x1="19" y1="12" x2="5" y2="12" data-astro-cid-eo3wme6m></line><polyline points="12 19 5 12 12 5" data-astro-cid-eo3wme6m></polyline></svg> <span data-astro-cid-eo3wme6m>Retour</span> </a> <article class="post" data-astro-cid-eo3wme6m> <div class="hero" data-astro-cid-eo3wme6m> <img src="/Portfolio/sony.svg" alt="Sony Electronics" class="hero-image" data-astro-cid-eo3wme6m> <div class="hero-overlay" data-astro-cid-eo3wme6m></div> <div class="hero-content" data-astro-cid-eo3wme6m> <h1 class="title" data-astro-cid-eo3wme6m>Sony Electronics</h1> <p class="description" data-astro-cid-eo3wme6m>Pour ce projet nous avons du créer une boutique de E-commerce avec la possibilité de récupérer les commandes en click &amp; collect. Nous avons du le réalisé en bînome à l&#39;aide de Wordpress mais aussi de Woocomerce principalement.</p> <div class="post-meta" data-astro-cid-eo3wme6m> <div class="date-container" data-astro-cid-eo3wme6m> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-eo3wme6m><rect x="3" y="4" width="18" height="18" rx="2" ry="2" data-astro-cid-eo3wme6m></rect><line x1="16" y1="2" x2="16" y2="6" data-astro-cid-eo3wme6m></line><line x1="8" y1="2" x2="8" y2="6" data-astro-cid-eo3wme6m></line><line x1="3" y1="10" x2="21" y2="10" data-astro-cid-eo3wme6m></line></svg> <time datetime="2023-11-15T00:00:00.000Z"> 15 novembre 2023 </time> </div>  <a href="https://sae10.mmidev.fr" target="_blank" rel="noopener noreferrer" class="project-link" data-astro-cid-eo3wme6m> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-eo3wme6m>  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1-2-2h6" data-astro-cid-eo3wme6m></path> <polyline points="15 3 21 3 21 9" data-astro-cid-eo3wme6m></polyline> <line x1="10" y1="14" x2="21" y2="3" data-astro-cid-eo3wme6m></line>  </svg>
 Voir le projet
 </a> </div> <div class="post-tags" data-astro-cid-eo3wme6m> <span class="tag" data-astro-cid-eo3wme6m>E-commerce</span><span class="tag" data-astro-cid-eo3wme6m>WordPress</span> </div> </div> </div> <div class="prose" data-astro-cid-apjhz64k>  <style>
   h1:first-of-type {
@@ -193,4 +226,4 @@ Retour aux projets
                     once: true,
                 });
             });
-        </script> </body> </html>   <script type="module" src="/Portfolio/assets/js/ProjectLayout.astro_astro_type_script_index_0_lang.JrmuN1F6.js"></script>
+        </script> </body> </html>   <script type="module" src="/Portfolio/Portfolio//Portfolio/_assets/js/ProjectLayout.astro_astro_type_script_index_0_lang.JrmuN1F6.js"></script>
